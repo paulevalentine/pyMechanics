@@ -1,0 +1,6 @@
+[project]
+name="pyMechanics"
+version="2025.0.0"
+dependencies = [
+
+]
