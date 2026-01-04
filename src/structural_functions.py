@@ -55,10 +55,35 @@ def elastic_bending_stress(moment: float, load: float, area: float, secton_modul
     return smax_val.rhs, smin_val.rhs
 
 
-def ss_max_deflection(w: float, l: float, iSec: float, aSec: float, Emod: float, Gmod: float):
-    dm = (5*w*(span*10**3)**4)/(384*Emod*iSec)
-    dv = 1.2 * w * (self.span*10**3)**2/(8*Gmod*aSec)
-    dt = dm + dv
-    print(f"Beam deflection = {dt:.2f} mm")
-    return dt
+def ss_max_deflection(w: float, l: float, iSec: float, aSec: float, Emod: float, Gmod: float)->float:
+    """
+    Function to calculate the bending and shear deflection of a simply supported beam
+    under a UDL
+    :param w: load per metre in kN/m
+    :param l: span in mm
+    :param iSec: section moment of inertia in mm^4
+    :param aSec: section area in mm^2
+    :param Emod: modulus of elasticity in MPa
+    :param Gmod: modulus of rigidity in MPa
+    :return: deflection in mm
+    """
+    display(Markdown("Calculate the max bending deflection (mm):"))
+    dm, load, span, i, a, Em, Gm = sp.symbols("delta_m, w, l, I, A, E_m, G_m")
+    dm_eq = sp.Eq(dm, (5 * load * span**4)/(384 * Em * i))
+    dm_val = dm_eq.subs({load:w, span:l, i:iSec, a:aSec, Em:Emod, Gm:Gmod}).evalf(3)
+    display(dm_eq, dm_val)
+
+    display(Markdown("Calculate the max shear deflection (mm):"))
+    dv = sp.symbols("delta_v")
+    dv_eq = sp.Eq(dv, (1.2 * load * span**2)/(8 * Gm * a))
+    dv_val = dv_eq.subs({load:w, span:l, a:aSec, Gm:Gmod}).evalf(3)
+    display(dv_eq, dv_val)
+
+    display(Markdown("Calculate the total deflection (mm):"))
+    dt = sp.symbols("delta_t")
+    dt_eq = sp.Eq(dt, dm + dv)
+    dt_val = dt_eq.subs({dm:dm_val.rhs, dv:dv_val.rhs}).evalf(3)
+    display(dt_eq, dt_val)
+
+    return dt_val.rhs
 
